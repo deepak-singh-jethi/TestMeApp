@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPSC Strict Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>⚖️ The Weighted Deck</h1>
+            <p>Hard topics appear often. Nothing is skipped.</p>
+        </header>
+
+        <div id="start-view">
+            <button class="btn-main" onclick="app.drawNewBatch()">
+                🎲 Draw 4 New Topics
+            </button>
+            <p class="hint">Once drawn, there is no going back.</p>
+        </div>
+
+        <div id="active-view" class="card" style="display: none;">
+            <div class="status-bar">
+                <span id="deck-status">Deck Status: --</span>
+            </div>
+
+            <div class="timer-box">
+                <div id="timer-display" class="timer-text">--</div>
+                <div id="status-badge" class="badge">--</div>
+            </div>
+            
+            <div id="topic-list">
+                </div>
+
+            <button id="finish-btn" class="btn-finish" onclick="app.completeBatch()" disabled>
+                🔒 Complete All Tasks First
+            </button>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="logic.js"></script>
+
+</body>
+</html>
