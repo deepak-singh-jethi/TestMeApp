@@ -3,44 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPSC Strict Planner</title>
+    <title>UPSC Master Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="syllabus.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
+    <nav class="navbar">
+        <div class="logo">⚖️ UPSC Tracker</div>
+        <div class="nav-links">
+            <button onclick="app.showHome()" class="nav-btn active">Home</button>
+            <button onclick="app.showSyllabus()" class="nav-btn">Syllabus & Progress</button>
+        </div>
+    </nav>
+
     <div class="container">
-        <header>
-            <h1>⚖️ The Weighted Deck</h1>
-            <p>Hard topics appear often. Nothing is skipped.</p>
-        </header>
+        
+        <div id="home-view">
+            <header class="hero-section">
+                <h1>Ready to Grind?</h1>
+                <p>The weighted algorithm decides your fate. No skipping allowed.</p>
+            </header>
 
-        <div id="start-view">
-            <button class="btn-main" onclick="app.drawNewBatch()">
-                🎲 Draw 4 New Topics
-            </button>
-            <p class="hint">Once drawn, there is no going back.</p>
-        </div>
-
-        <div id="active-view" class="card" style="display: none;">
-            <div class="status-bar">
-                <span id="deck-status">Deck Status: --</span>
-            </div>
-
-            <div class="timer-box">
-                <div id="timer-display" class="timer-text">--</div>
-                <div id="status-badge" class="badge">--</div>
-            </div>
-            
-            <div id="topic-list">
+            <div id="start-view" class="glass-panel">
+                <div class="stats-overview">
+                    <div class="stat-item">
+                        <span class="stat-val" id="total-left">--</span>
+                        <span class="stat-label">Cards Left</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-val" id="total-done">--</span>
+                        <span class="stat-label">Completed</span>
+                    </div>
                 </div>
+                
+                <button class="btn-main glow" onclick="app.drawNewBatch()">
+                    🎲 Draw New Batch
+                </button>
+            </div>
 
-            <button id="finish-btn" class="btn-finish" onclick="app.completeBatch()" disabled>
-                🔒 Complete All Tasks First
-            </button>
+            <div id="active-view" class="glass-panel" style="display: none;">
+                <div class="timer-box">
+                    <div class="timer-label">DEADLINE</div>
+                    <div id="timer-display" class="timer-text">--</div>
+                </div>
+                
+                <div id="topic-list" class="list-container">
+                    </div>
+
+                <button id="finish-btn" class="btn-finish" onclick="app.completeBatch()" disabled>
+                    🔒 Finish All Topics First
+                </button>
+            </div>
         </div>
+
+        <div id="syllabus-view" style="display: none;">
+            <header class="hero-section small">
+                <h2>Subject Progress</h2>
+                <p>Track your coverage across all domains.</p>
+            </header>
+            
+            <div id="syllabus-grid" class="grid-layout">
+                </div>
+        </div>
+
     </div>
 
     <script src="data.js"></script>
+    <script src="syllabus.js"></script> 
     <script src="logic.js"></script>
 
 </body>

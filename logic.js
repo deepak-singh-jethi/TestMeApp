@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'upsc_deck_v2';
+const STORAGE_KEY = 'upsc_deck_v3'; // Incremented version
 
 // --- UTILS ---
 const shuffle = (array) => {
@@ -9,192 +9,167 @@ const shuffle = (array) => {
     return array;
 };
 
-// Updated to show "Mon, Feb 16"
-const formatDate = (ts) => new Date(ts).toLocaleDateString('en-US', { 
-    weekday: 'short', 
-    month: 'short', 
-    day: 'numeric' 
-});
-
+const formatDate = (ts) => new Date(ts).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
 // --- MAIN CLASS ---
 class StudyEngine {
     constructor() {
-        try {
-            // Attempt to load state
-            const raw = localStorage.getItem(STORAGE_KEY);
-            this.state = raw ? JSON.parse(raw) : this.getDefaultState();
-            
-            // Validation: If state is corrupted (missing critical keys), force reset
-            if (!this.state.decks || !this.state.currentBatch) {
-                throw new Error("Corrupted State");
-            }
-        } catch (e) {
-            console.warn("⚠️ State corrupted or old. Resetting app...", e);
-            this.state = this.getDefaultState();
-            this.save();
-        }
-
-        this.ui = {
-            start: document.getElementById('start-view'),
-            active: document.getElementById('active-view'),
-            list: document.getElementById('topic-list'),
-            timer: document.getElementById('timer-display'),
-            badge: document.getElementById('status-badge'),
-            finishBtn: document.getElementById('finish-btn'),
-            deckStat: document.getElementById('deck-status')
-        };
-
-        this.init();
-    }
-
-    getDefaultState() {
-        return {
+        this.state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
             active: false,
             decks: {}, 
             currentBatch: [],
             quizDate: null,
             rangeStr: ""
         };
+
+        // Cache DOM elements
+        this.ui = {
+            homeView: document.getElementById('home-view'),
+            syllabusView: document.getElementById('syllabus-view'),
+            start: document.getElementById('start-view'),
+            active: document.getElementById('active-view'),
+            list: document.getElementById('topic-list'),
+            timer: document.getElementById('timer-display'),
+            finishBtn: document.getElementById('finish-btn'),
+            totalLeft: document.getElementById('total-left'),
+            totalDone: document.getElementById('total-done'),
+            syllabusGrid: document.getElementById('syllabus-grid'),
+            navBtns: document.querySelectorAll('.nav-btn')
+        };
+
+        this.init();
     }
 
     init() {
-        // Ensure decks exist for all subjects
-        if (typeof SYLLABUS !== 'undefined') {
-            Object.keys(SYLLABUS).forEach(sub => {
-                // If subject missing from deck, refill it
-                if (!this.state.decks[sub] || this.state.decks[sub].length === 0) {
-                    this.refillDeck(sub);
-                }
-            });
-        } else {
-            alert("❌ ERROR: data.js not loaded. Check file names!");
-        }
+        // Ensure decks exist
+        Object.keys(SYLLABUS).forEach(sub => {
+            if (!this.state.decks[sub] || this.state.decks[sub].length === 0) {
+                this.refillDeck(sub);
+            }
+        });
         
         this.render();
+        this.renderStats(); // Update dashboard numbers
         setInterval(() => this.updateTimer(), 60000);
     }
 
-    // --- ALGORITHM PART 1: THE WEIGHTED DECK ---
     refillDeck(subject) {
         let newDeck = [];
         const topics = SYLLABUS[subject];
-
         topics.forEach(t => {
             const count = t.w; 
-            for(let i=0; i<count; i++) {
-                newDeck.push(t);
-            }
+            for(let i=0; i<count; i++) newDeck.push(t);
         });
-
         this.state.decks[subject] = shuffle(newDeck);
         this.save();
     }
 
-drawNewBatch() {
-        if (this.state.active) return; // Strict Mode: Block if active
+    drawNewBatch() {
+        if (this.state.active) return; 
 
         const subjects = Object.keys(SYLLABUS);
         const newBatch = [];
-        let totalWeight = 0; // We now sum the weights
+        let totalWeight = 0;
 
         subjects.forEach(sub => {
-            // 1. Check if deck is empty, if so, refill
-            if (this.state.decks[sub].length === 0) {
-                this.refillDeck(sub);
-            }
-
-            // 2. Draw one card
+            if (this.state.decks[sub].length === 0) this.refillDeck(sub);
             const card = this.state.decks[sub].pop();
-            
-            newBatch.push({
-                subject: sub,
-                name: card.t, 
-                weight: card.w, 
-                done: false 
-            });
-
-            // Accumulate weight for the deadline calculation
+            newBatch.push({ subject: sub, name: card.t, weight: card.w, done: false });
             totalWeight += card.w;
         });
 
-        // 3. Schedule Logic (Sum of Weights)
-        // Sum 1-10 = 2 Days | 11-14 = 3 Days | 15+ = 4 Days
+        // Time Calculation
         let daysToAdd = 2;
-        
-        if (totalWeight >= 11 && totalWeight <= 14) {
-            daysToAdd = 3;
-        } else if (totalWeight >= 15) {
-            daysToAdd = 4;
-        }
+        if (totalWeight >= 11 && totalWeight <= 14) daysToAdd = 3;
+        else if (totalWeight >= 15) daysToAdd = 4;
 
         const now = new Date();
         const targetDate = new Date();
         targetDate.setDate(now.getDate() + daysToAdd);
-        targetDate.setHours(9, 0, 0, 0); // 9 AM Fixed
+        targetDate.setHours(9, 0, 0, 0);
 
-        // 4. Update State
         this.state.active = true;
         this.state.currentBatch = newBatch;
         this.state.quizDate = targetDate.getTime();
-        this.state.rangeStr = `Deadline: ${formatDate(targetDate)}`;
+        this.state.rangeStr = `${formatDate(targetDate)}`;
 
         this.save();
         this.render();
+        this.renderStats();
     }
 
     toggleTopic(idx) {
         this.state.currentBatch[idx].done = !this.state.currentBatch[idx].done;
         this.save();
-        this.render(); 
+        this.render();
     }
 
     completeBatch() {
         const allDone = this.state.currentBatch.every(t => t.done);
         if(!allDone) {
-            alert("❌ Discipline Check: You cannot finish until all topics are done.");
+            alert("❌ Finish all topics first!");
             return;
         }
-
-        if(!confirm("✅ Confirm: You have revised these topics and are ready for the next set?")) return;
+        if(!confirm("✅ Mark batch as done?")) return;
 
         this.state.active = false;
         this.state.currentBatch = [];
         this.save();
         this.render();
+        this.renderStats();
     }
 
     save() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
     }
 
-    // --- UI RENDERING ---
+    // --- NAVIGATION ---
+    showHome() {
+        this.ui.homeView.style.display = 'block';
+        this.ui.syllabusView.style.display = 'none';
+        this.updateNav(0);
+    }
+
+    showSyllabus() {
+        this.ui.homeView.style.display = 'none';
+        this.ui.syllabusView.style.display = 'block';
+        this.renderSyllabusView();
+        this.updateNav(1);
+    }
+    
+    updateNav(idx) {
+        this.ui.navBtns.forEach((btn, i) => {
+            if(i === idx) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+    }
+
+    // --- RENDERING ---
     updateTimer() {
         if(!this.state.active) return;
-        
-        const now = Date.now();
-        const diff = this.state.quizDate - now;
-        const hours = diff / (1000 * 60 * 60);
+        this.ui.timer.innerText = this.state.rangeStr;
+    }
 
-        if (hours > 24) {
-            this.ui.timer.innerText = this.state.rangeStr;
-            this.ui.timer.className = "timer-text neutral";
-            this.ui.badge.innerText = "Scheduled Window";
-            this.ui.badge.className = "badge neutral";
-        } else if (hours > -12) {
-            this.ui.timer.innerText = "⚠️ QUIZ ACTIVE";
-            this.ui.timer.className = "timer-text alert";
-            this.ui.badge.innerText = "Time to Test";
-            this.ui.badge.className = "badge alert";
-        } else {
-            this.ui.timer.innerText = "OVERDUE";
-            this.ui.timer.className = "timer-text alert";
-            this.ui.badge.innerText = "Missed Deadline";
-        }
+    renderStats() {
+        // Calculate total cards in full cycle vs current deck
+        let totalCardsInCycle = 0;
+        let currentCardsLeft = 0;
+
+        Object.keys(SYLLABUS).forEach(sub => {
+            // Full Cycle
+            SYLLABUS[sub].forEach(t => totalCardsInCycle += t.w);
+            // Remaining
+            currentCardsLeft += this.state.decks[sub].length;
+        });
+
+        const completed = totalCardsInCycle - currentCardsLeft;
+        
+        this.ui.totalLeft.innerText = currentCardsLeft;
+        this.ui.totalDone.innerText = completed;
     }
 
     render() {
-        // Toggle Views
+        // Home Screen Logic
         if (this.state.active) {
             this.ui.start.style.display = 'none';
             this.ui.active.style.display = 'block';
@@ -206,17 +181,15 @@ drawNewBatch() {
 
         this.updateTimer();
 
-        // Render List
         this.ui.list.innerHTML = '';
         this.state.currentBatch.forEach((t, idx) => {
             const isChecked = t.done ? 'checked' : '';
             const rowClass = t.done ? 'topic-row done' : 'topic-row';
             
-            // Note: input is disabled because the ROW CLICK handles the toggle
             this.ui.list.innerHTML += `
                 <div class="${rowClass}" onclick="app.toggleTopic(${idx})">
                     <div class="check-col">
-                        <input type="checkbox" ${isChecked}>
+                        <input type="checkbox" ${isChecked}> 
                     </div>
                     <div class="info-col">
                         <div class="sub">${t.subject}</div>
@@ -229,16 +202,18 @@ drawNewBatch() {
             `;
         });
 
-        // Finish Button Logic
         const allDone = this.state.currentBatch.every(t => t.done);
         this.ui.finishBtn.disabled = !allDone;
-        this.ui.finishBtn.innerText = allDone ? "✅ Mark Batch Complete" : "🔒 Finish All Topics First";
-        
-        // Deck Stats
-        const totalCards = this.state.decks ? Object.values(this.state.decks).reduce((a, b) => a + b.length, 0) : 0;
-        this.ui.deckStat.innerText = `Cards remaining in deck: ${totalCards}`;
+    }
+
+  renderSyllabusView() {
+        // Use the new modular renderer
+        if (window.syllabusViewer) {
+            window.syllabusViewer.render(this.state);
+        } else {
+            console.error("Syllabus Renderer not loaded");
+        }
     }
 }
 
-// Global Instance
 window.app = new StudyEngine();

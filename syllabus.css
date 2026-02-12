@@ -1,0 +1,146 @@
+/* Container adjustments */
+#syllabus-view {
+    padding-bottom: 60px;
+}
+
+.syllabus-card {
+    background: white;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+    border: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+}
+
+/* Header Section (Always Visible) */
+.syl-header {
+    padding: 20px;
+    cursor: pointer;
+    background: white;
+}
+
+.syl-header:hover {
+    background: #f9fafb;
+}
+
+.syl-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.syl-title-row h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1f2937;
+}
+
+.syl-badge {
+    background: #eef2ff;
+    color: #4f46e5;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.main-progress-track {
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.main-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4f46e5, #818cf8);
+    border-radius: 3px;
+    transition: width 0.6s ease;
+}
+
+.expand-hint {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #9ca3af;
+    margin-top: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Body Section (Hidden by default) */
+.syl-body {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    background: #fafafa;
+    border-top: 1px solid #eee;
+}
+
+/* Expanded State */
+.syllabus-card.expanded .syl-body {
+    max-height: 1000px; /* Arbitrary large height */
+    opacity: 1;
+    padding: 10px;
+}
+
+.syllabus-card.expanded .expand-hint {
+    transform: rotate(180deg);
+}
+
+/* Topic Items */
+.topic-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.topic-item.completed { border-left: 4px solid #10b981; }
+.topic-item.in-progress { border-left: 4px solid #f59e0b; }
+.topic-item.pending { border-left: 4px solid #e5e7eb; }
+
+.topic-info { display: flex; flex-direction: column; }
+
+.topic-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.topic-meta {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.topic-visual {
+    width: 80px;
+    text-align: right;
+}
+
+.mini-progress-bar {
+    height: 4px;
+    background: #eee;
+    border-radius: 2px;
+    margin-bottom: 4px;
+    overflow: hidden;
+}
+
+.mini-fill {
+    height: 100%;
+    background: #10b981;
+}
+
+.topic-percent {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #6b7280;
+}
