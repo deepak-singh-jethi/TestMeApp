@@ -216,7 +216,7 @@ drawNewBatch() {
             this.ui.list.innerHTML += `
                 <div class="${rowClass}" onclick="app.toggleTopic(${idx})">
                     <div class="check-col">
-                        <input type="checkbox" ${isChecked} disabled> 
+                        <input type="checkbox" ${isChecked}>
                     </div>
                     <div class="info-col">
                         <div class="sub">${t.subject}</div>

@@ -37,8 +37,12 @@ p { color: #7f8c8d; font-size: 0.9rem; }
 .topic-row.done .name { text-decoration: line-through; color: #aaa; }
 
 .check-col { margin-right: 15px; display: flex; align-items: center; }
-.check-col input { width: 20px; height: 20px; cursor: pointer; }
-
+.check-col input { 
+    width: 20px; 
+    height: 20px; 
+    cursor: pointer; 
+    pointer-events: none; /* Allows the click to pass through to the row */
+}
 .info-col { flex: 1; }
 .sub { font-size: 0.7rem; text-transform: uppercase; color: #aaa; font-weight: 700; margin-bottom: 2px; }
 .name { font-weight: 600; font-size: 1.05rem; }
