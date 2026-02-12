@@ -24,14 +24,12 @@ p { color: #7f8c8d; font-size: 0.9rem; }
 .card { background: var(--card); border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
 .status-bar { text-align: center; font-size: 0.75rem; color: #bdc3c7; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
 
-
 .timer-box { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
 .timer-text { font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 10px; }
 .timer-text.neutral { color: var(--accent); }
 .timer-text.alert { color: var(--red); }
 .badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; background: #eee; color: #7f8c8d; }
 .badge.alert { background: #fadbd8; color: var(--red); }
-
 
 .topic-row { display: flex; align-items: center; padding: 15px; border: 1px solid #eee; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
 .topic-row:hover { background: #fbfbfb; border-color: #ddd; }
@@ -49,7 +47,7 @@ p { color: #7f8c8d; font-size: 0.9rem; }
 .w-1 { background: var(--green); }
 .w-2 { background: var(--orange); }
 .w-3 { background: var(--red); }
-
+.w-4 { background: #8e44ad; }
 /* Finish Button */
 .btn-finish { width: 100%; margin-top: 20px; padding: 15px; border: 2px solid var(--accent); background: transparent; color: var(--accent); font-weight: bold; border-radius: 8px; cursor: pointer; }
 .btn-finish:hover:not(:disabled) { background: var(--accent); color: white; }
